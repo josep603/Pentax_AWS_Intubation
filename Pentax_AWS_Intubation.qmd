@@ -1,0 +1,303 @@
+---
+title: "Case Study:Ease of Intubation Pentax AWS vs Standard Macintosh laryngoscope with a #4 blade in obese patients "
+author: "Bibin Joseph"
+format: pdf
+fontsize: 9pt
+editor: visual
+---
+
+## Introduction: 
+
+“Difficult and failed tracheal intubations are among the principal causes of anesthetic-related mortality and morbidity,” (*Laryngoscope – Teaching of Statistics in the Health Sciences*, n.d.)and the Pentax AWS, being a video laryngoscope, is designed to improve visualization and facilitate easy intubation. The proposed study investigates whether intubation with the Pentax AWS is easier and faster than a standard Macintosh laryngoscope with a #4 blade in obese patients (BMI 30-50 kg/m2) undergoing surgery. The secondary questions will be: Is the glottic view obtained with the Pentax AWS better than with the Macintosh laryngoscope (as assessed by the Cormack-Lehane grading system)? and Is the incidence of blood staining or postoperative sore throat lower with the Pentax AWS? A randomized controlled trial will be done, and the subjects will be grouped into Pentax AWS and Macintosh groups. 
+
+### Dataset: 
+
+The instructors provided the dataset Laryngoscope; both Excel and CSV format files were provided by the instructors in Canvas. The data dictionary was also provided in Canvas. The dataset contains details of clinical studies comparing the effectiveness of the Pentax AWS video laryngoscope versus the standard Macintosh laryngoscope in obese patients undergoing surgery. The sample size is 99 subjects, and there are 22 variables. It contains variables related to patient demographics (age, gender, BMI), clinical assessment scores (ASA, Mallampati), details on the intubation process (attempt times, success/failure of attempts), and post-intubation outcomes (bleeding, ease of intubation, sore throat, view during intubation) 
+
+### Exploratory Data Analysis: 
+
+Table1. Shows the summary table of the variables using the table one library in R. The data is stratified by randomization, i.e., patients intubated with a Macintosh #4 blade versus those with a Pentax AWS. Sample sizes were comparable across groups, with 49 and 50 patients, respectively. Age and BMI showed no significant differences, indicating a similar demographic profile. Gender distribution was nearly identical across groups, further supporting comparability. ASA physical status and Mallampati scores suggested variability in patient health and airway complexity, yet no statistical significance was found, hinting at balanced group health statuses. Randomization demonstrated perfect separation between the two devices. Incidence of bleeding was rare and comparable, while sore throat prevalence post-intubation was similarly distributed across groups, showing no significant differences. Ease of intubation significantly differed, favoring the Pentax AWS, and the view obtained during intubation was better with the Pentax AWS, although this did not reach statistical significance. This analysis provides insights into the clinical and procedural outcomes of each laryngoscope type, with notable differences in ease of use. 
+
+Graphical Summaries of the data are provided in Figures 1 to 7. Figure 1 shows a density plot that visualizes the age distribution across both treatment groups, highlighting demographic similarities or differences. Figure 2 shows the violin plot assessing the "ease" of intubation, combining distribution shape and density to give an idea of which group has more ease. Figure 3 shows the total intubation time's histogram, revealing frequency and duration insights. Though there is some overlap, we can say that the Macintosh shows less intubation time than the Pentax. Figure 4 is the boxplot that contrasts the ease of intubation  with bleeding occurrences, and we can see there is no bleeding Macintosh #4 blade. Figure 5 shows the histogram, which examines sore throat severity post-intubation. Figure 6 is a scatter plot that correlates total intubation time with ease, all differentiated by treatment group, offering comprehensive insights into procedural outcomes and effectiveness. Figure 7 shows a Kaplan-Meier survival graph stratified by randomization, which compares the survival probability of successful intubation over time between two groups. The x-axis represents the total intubation time in seconds, and the y-axis shows the survival probability. Two curves represent the different groups, with the shaded areas indicating the confidence intervals. The curves' steepness suggests the rate at which the probability of successful intubation decreases over time. The p-value (\< 0.0001) indicates a statistically significant difference between the groups. n the Kaplan-Meier survival curve, the Macintosh #4 blade curve being below the AWS curve suggests that the group using the Macintosh #4 blade had a lower survival probability over time compared to the group using the Pentax AWS 
+
+### Methods:
+
+In the analysis, I employed multiple statistical models to assess differences between two intubation techniques: the Macintosh #4 blade and the Pentax AWS. The methods included Cox Proportional Hazards models to evaluate intubation success rates and Kaplan-Meier curves for survival analysis, alongside multiple linear regression to control for confounders such as age and BMI. These approaches aim to identify significant variations in ease of intubation, total intubation time, and postoperative outcomes across the two groups, providing a comprehensive overview of their relative effectiveness. 
+
+### Results: 
+
+Table 1 shows the summary table for the Cox Proportional Hazards model output, indicating that using the Pentax AWS significantly reduces the hazard of intubation failure compared to the Macintosh #4 blade, with a hazard ratio of 0.3824. This means patients intubated with the Pentax AWS have a 61.76% lower risk of intubation failure. The p-value (\<0.00001) strongly supports this finding. The model's concordance index is 0.654, suggesting a moderate predictive accuracy. The confidence interval for the hazard ratio (0.2524 to 0.5794) further confirms the significance of this result. 
+
+Table 2. Provides the summary table for a multiple linear regression model that analyzed factors affecting the ease of tracheal intubation. The model included the type of laryngoscope used, the patient's age, gender, body mass index (BMI), American Society of Anesthesiologists (ASA) physical status classification, and Mallampati score as predictors. The results indicate that using the Pentax AWS (p=0.0203) and having an ASA status of III (p=0.0402) are significantly associated with an increased ease of intubation. Age and gender show a trend towards significance, suggesting a possible influence. The Mallampati scores, which assess the visibility of the throat structures, were not significantly associated with ease of intubation. The model explains approximately 20.6% of the variance in ease of intubation, indicating other factors may also play a role. This model's findings should be interpreted with its limitations in mind, including the moderate R-squared value and the potential for unmeasured confounding factors. 
+
+### Conclusion: 
+
+The study aimed to determine the efficacy of the Pentax AWS compared to the standard Macintosh #4 blade in obese patients requiring tracheal intubation. The analysis revealed that the Pentax AWS is associated with a higher ease of intubation and a lower risk of intubation failure, as indicated by the significant findings in the Cox Proportional Hazards model. However, other factors such as age, gender, and Mallampati scores showed a trend toward significance but did not conclusively affect the ease of intubation. The study's limitations include a moderate R-squared value, suggesting that other unmeasured variables may impact the outcomes, and the potential for confounding factors was present. The findings advocate for careful consideration of the Pentax AWS in clinical settings, particularly for obese patients, while also recognizing the need for more comprehensive research to corroborate these results and address the study's limitations. 
+
+### Code
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+library(tidyverse)
+library(psych)
+library(dplyr)
+library(broom)
+library(knitr)
+library(Hmisc)
+library(gt)
+library(gridExtra)
+library(tableone)
+library(survival)
+library(survminer)
+library(car)
+library(lmtest)
+
+laryngoscope<-read.csv("Laryngoscope.csv")
+laryn<-laryngoscope
+```
+
+Exploratory Data Analysis
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+missing<-colSums(is.na(laryngoscope))
+kable(missing)
+
+# Continuous variables
+continuous_vars <- c("age", "BMI", "attempt1_time","attempt2_time","attempt3_time","attempts", "failures", "total_intubation_time")
+
+# Categorical variables
+categorical_vars <- c("gender", "asa", "Mallampati", "Randomization", "attempt1_S_F", "attempt2_assigned_method","attempt2_S_F",  "attempt3_assigned_method", "attempt3_S_F", "intubation_overall_S_F", "bleeding", "ease", "sore_throat", "view")
+
+```
+
+Creating labels, Table one
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+# Variable labels for categorical variables
+label(laryngoscope$gender) <- "Gender"
+label(laryngoscope$asa) <- "American Society of Anesthesiologists physical status"
+label(laryngoscope$Mallampati) <- "Mallampati score predicting ease of intubation"
+label(laryngoscope$Randomization) <- "Laryngoscope patient randomized to receive"
+label(laryngoscope$attempt1_S_F) <- "Successful intubation first attempt"
+label(laryngoscope$attempt2_assigned_method) <- "Second intubation attempt made with assigned laryngoscope"
+label(laryngoscope$attempt2_S_F) <- "Successful intubation second attempt"
+label(laryngoscope$attempt3_assigned_method) <- "Third intubation attempt made with assigned laryngoscope"
+label(laryngoscope$attempt3_S_F) <- "Successful intubation third attempt"
+label(laryngoscope$total_intubation_time) <- "Intubation time"
+label(laryngoscope$intubation_overall_S_F) <- "Overall successful intubation"
+label(laryngoscope$bleeding) <- "Bleeding (trace)"
+label(laryngoscope$ease) <- "Ease of tracheal intubation"
+label(laryngoscope$sore_throat) <- "Severity of postoperative sore throat"
+label(laryngoscope$view) <- "Cormack-Lehane grade of glottic view"
+
+# Variable labels for continuous variables
+label(laryngoscope$age) <- "Age"
+label(laryngoscope$BMI) <- "Body Mass Index"
+label(laryngoscope$attempt1_time) <- "First intubation attempt time"
+label(laryngoscope$attempt2_time) <- "Second intubation attempt time"
+label(laryngoscope$attempt3_time) <- "Third intubation attempt time"
+label(laryngoscope$attempts) <- "Number of intubation attempts"
+label(laryngoscope$failures) <- "Number of intubation failures"
+
+laryngoscope <- laryngoscope %>%
+  mutate(
+    gender = factor(
+      gender,
+      levels = c(0, 1),
+      labels = c("Female", "Male")
+    ),
+    asa = factor(
+      asa,
+      levels = 1:4,
+      labels = c("I", "II", "III", "IV")
+    ),
+    Mallampati = factor(
+      Mallampati,
+      levels = 1:4,
+      labels = c(
+        "Full visibility of tonsils, uvula and soft palate",
+        "Visibility of hard and soft palate, upper portion of tonsils and uvula",
+        "Soft and hard palate and base of the uvula are visible",
+        "Only Hard Palate visible"
+      )
+    ),
+    Randomization = factor(
+      Randomization,
+      levels = c(0, 1),
+      labels = c("Macintosh #4 blade", "Pentax AWS")
+    ),
+    bleeding = factor(
+      bleeding,
+      levels = c(0, 1),
+      labels = c("No", "Yes")
+    ),
+    sore_throat = factor(
+      sore_throat,
+      levels = 0:3,
+      labels = c("None", "Mild", "Moderate", "Severe")
+    ),
+    view = factor(
+      view,
+      levels = c(0, 1),
+      labels = c("Not good", "Good")
+    )
+  )
+
+myvars <-
+  c(
+    "age",
+    "gender",
+    "BMI",
+    "asa",
+    "Mallampati",
+    "Randomization",
+    "bleeding",
+    "sore_throat",
+    "ease",
+    "view",
+    "total_intubation_time"
+  )
+
+catvars<-
+  c(
+    "gender",
+    "asa",
+    "Mallampati",
+    "Randomization",
+    "bleeding",
+    "sore_throat",
+    "view"
+  )
+table1 <- CreateTableOne(vars = myvars, data = laryngoscope,factorVars = catvars,strata = "Randomization")
+print(table1,showAllLevels=TRUE)
+
+```
+
+EDA Plots
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+# Density Plot for Age by Treatment Group with Labels
+ggplot(laryngoscope, aes(x = age, fill = as.factor(Randomization))) +
+  geom_density(alpha = 0.7) +
+  labs(title = "Density Plot of Age by Treatment Group", x = "Age", y = "Density") +
+  theme_minimal() +
+  scale_color_manual(values = c("0" = "blue", "1" = "orange"), 
+                    labels = c("Macintosh #4 blade", "Pentax AWS"),
+                    name = "Treatment Group")
+
+# Violin Plot for "ease" of treatment
+ggplot(laryngoscope, aes(x = as.factor(Randomization), y = ease, fill = as.factor(Randomization))) +
+  geom_violin(scale = "width", trim = FALSE) +
+  labs(title = "Violin Plot of Ease by Treatment Group", x = "Treatment Group", y = "Ease") +
+  theme_classic() +
+  scale_color_manual(values = c("0" = "chocolate3", "1" = "skyblue"),
+                    labels = c("Macintosh #4 blade", "Pentax AWS"),
+                    name = "Laryngoscope Type")
+
+
+# Histogram of Total Intubation Time for both groups
+ggplot(laryngoscope, aes(x = total_intubation_time, fill = as.factor(Randomization))) +
+  geom_histogram(binwidth = 10, position = "identity", alpha = 0.7) +
+  labs(title = "Overlapping Histogram of Total Intubation Time", 
+       x = "Total Intubation Time (seconds)", y = "Frequency") +
+  theme_minimal() +
+  scale_color_manual(values = c("0" = "blue", "1" = "orange"),
+                    labels = c("Macintosh #4 blade", "Pentax AWS"),
+                    name = "Treatment Group")
+
+
+
+# Boxplot of Ease by Bleeding for both groups 
+ggplot(laryngoscope, aes(x = as.factor(bleeding), y = ease, fill = as.factor(bleeding))) +
+  geom_boxplot() +
+  facet_wrap(~ as.factor(Randomization), ncol = 2) +  # Separate by treatment group
+  labs(title = "Boxplot of Ease by Bleeding for Both Groups", x = "Bleeding", y = "Ease") +
+  theme_minimal() +
+  scale_color_manual(values = c("0" = "blue", "1" = "red"),
+                    labels = c("No Bleeding", "Bleeding"),
+                    name = "Bleeding")
+
+
+# Plotting the histogram for both groups side by side with modified legend and tilted x-axis labels
+ggplot(laryngoscope, aes(x = sore_throat, fill = factor(sore_throat))) +
+  geom_bar(stat = "count", position = "dodge") +
+  facet_wrap(~ Randomization, scales = "free_y") +
+  labs(title = "Histogram of Sore Throat Severity for Macintosh and Pentax Groups",
+       x = "Sore Throat Severity",
+       y = "Count",
+       fill = "Sore Throat") + # Change legend title to "Sore Throat"
+  scale_fill_brewer(palette = "Pastel1") +
+  theme_minimal() +
+  scale_x_discrete(limits = c("None", "Mild", "Moderate", "Severe")) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+# Scatter plot of Total Intubation Time vs Ease for both groups
+
+ggplot(laryngoscope, aes(x = total_intubation_time, y = ease, color = factor(Randomization, labels = c("Macintosh #4 blade", "Pentax AWS")))) +
+  geom_point() +
+  labs(title = "Scatter Plot of Total Intubation Time vs Ease",
+       x = "Total Intubation Time",
+       y = "Ease",
+       color = "Group") + # "Group" will be the title of the legend
+  theme_minimal() +
+  scale_color_brewer(palette = "Set1")
+
+
+
+```
+
+T Test for intubation time and ease
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+# intubation time
+t.test(total_intubation_time ~ Randomization, data = laryngoscope)
+
+#ease
+t.test(ease ~ Randomization, data = laryngoscope)
+
+```
+
+Cox Regression and Survival Plot
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+# Create a survival object
+surv_obj <- Surv(time = laryngoscope$total_intubation_time, event = laryngoscope$intubation_overall_S_F)
+
+# Fit a Kaplan-Meier survival curve
+km_fit <- survfit(surv_obj ~ laryngoscope$Randomization, data = laryngoscope)
+# Fit the Cox Proportional Hazards model
+cox_model <- coxph(surv_obj ~ Randomization, data = laryngoscope)
+
+# Print the summary of the Cox model
+summary(cox_model)
+
+# Plot the survival curve
+ggsurvplot(km_fit, data = laryngoscope, pval = TRUE, conf.int = TRUE,
+             xlab = "Total Intubation Time (seconds)", ylab = "Survival Probability",
+             title = "Kaplan-Meier Survival Curve Stratified by Randomization")
+
+
+```
+
+MLR for Ease
+
+```{r,warning=FALSE,message=FALSE,echo=FALSE}
+
+# Fit the Multiple Linear Regression model
+# Adjusting for 'age', 'gender', 'BMI' as confounders
+mlr_model <- lm(ease ~ Randomization + age + gender + BMI+asa+Mallampati, data = laryngoscope)
+
+# Summary of the model to see coefficients, p-values, etc.
+summary(mlr_model)
+
+# Optional: Diagnostic plots to check assumptions (residuals, fit, etc.)
+par(mfrow = c(2, 2))  # Arrange plots in a 2x2 grid
+plot(mlr_model)
+
+# Optional: Check for multicollinearity
+
+vif(mlr_model)  # Variance Inflation Factor
+
+# Reset plot settings
+par(mfrow = c(1, 1))
+
+```
